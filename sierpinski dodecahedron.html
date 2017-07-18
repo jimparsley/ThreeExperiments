@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>three.js webgl - materials - displacement map</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<style>
+			body {
+				background:#000;
+				color:#fff;
+				padding:0;
+				margin:0;
+				font-weight: bold;
+				overflow:hidden;
+			}
+			a {	color: #ffffff;	}
+			#info {
+				position: absolute;
+				top: 0px; width: 100%;
+				color: #ffffff;
+				padding: 5px;
+				font-family:Monospace;
+				font-size:13px;
+				text-align:center;
+			}
+			#vt { display:none }
+			#vt, #vt a { color:orange; }
+		</style>
+	</head>
+
+	<body>
+
+		<div id="info">
+			<span id="description">Sierpinski dodecahedron after three iterations</span>
+		</div>
+
+		<script src="js/three.js"></script>
+		<script src="js/controls/OrbitControls.js"></script>
+
+		<script src="js/Detector.js"></script>
+		<script src="js/libs/stats.min.js"></script>
+		<script src='js/libs/dat.gui.min.js'></script>
+
+		<script>
+			if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
+			var stats;
+			var camera, scene, renderer, controls;
+			var settings = {
+				metalness: 1.0,
+				roughness: 0.4,
+				ambientIntensity: 0.2,
+				aoMapIntensity: 1.0,
+				envMapIntensity: 1.0,
+				displacementScale: 2.436143, // from original model
+				normalScale: 1.0
+			};
+			var mesh, materia, cubeMesh;
+			var directionalLight, ambientLight;
+			var mouseX = 0;
+			var mouseY = 0;
+			var windowHalfX = window.innerWidth / 2;
+			var windowHalfY = window.innerHeight / 2;
+			var height = 500; // of camera frustum
+			var r = 0.0;
+
+			var GOLDEN_RATIO = (1 + Math.sqrt(5)) / 2;
+
+			var scaleFactor = 1/(1+GOLDEN_RATIO);
+
+			var explicitDodecahedronVertices = new Float32Array([
+	            (2*Math.cos(2*0*Math.PI/5)), (2*Math.sin(2*0*Math.PI/5)), GOLDEN_RATIO+1, // 0
+	            (2*Math.cos(2*1*Math.PI/5)), (2*Math.sin(2*1*Math.PI/5)), GOLDEN_RATIO+1, // 1
+	            (2*Math.cos(2*2*Math.PI/5)), (2*Math.sin(2*2*Math.PI/5)), GOLDEN_RATIO+1, // 2
+	            (2*Math.cos(2*3*Math.PI/5)), (2*Math.sin(2*3*Math.PI/5)), GOLDEN_RATIO+1, // 3
+	            (2*Math.cos(2*4*Math.PI/5)), (2*Math.sin(2*4*Math.PI/5)), GOLDEN_RATIO+1, // 4
+
+	            (2*GOLDEN_RATIO*Math.cos(2*0*Math.PI/5)), (2*GOLDEN_RATIO*Math.sin(2*0*Math.PI/5)), GOLDEN_RATIO-1, // 5
+	            (2*GOLDEN_RATIO*Math.cos(2*1*Math.PI/5)), (2*GOLDEN_RATIO*Math.sin(2*1*Math.PI/5)), GOLDEN_RATIO-1, // 6
+	            (2*GOLDEN_RATIO*Math.cos(2*2*Math.PI/5)), (2*GOLDEN_RATIO*Math.sin(2*2*Math.PI/5)), GOLDEN_RATIO-1, // 7
+	            (2*GOLDEN_RATIO*Math.cos(2*3*Math.PI/5)), (2*GOLDEN_RATIO*Math.sin(2*3*Math.PI/5)), GOLDEN_RATIO-1, // 8
+	            (2*GOLDEN_RATIO*Math.cos(2*4*Math.PI/5)), (2*GOLDEN_RATIO*Math.sin(2*4*Math.PI/5)), GOLDEN_RATIO-1, // 9
+
+	            (-2*GOLDEN_RATIO*Math.cos(2*0*Math.PI/5)), (-2*GOLDEN_RATIO*Math.sin(2*0*Math.PI/5)), -(GOLDEN_RATIO-1), // 10
+	            (-2*GOLDEN_RATIO*Math.cos(2*1*Math.PI/5)), (-2*GOLDEN_RATIO*Math.sin(2*1*Math.PI/5)), -(GOLDEN_RATIO-1), // 11
+	            (-2*GOLDEN_RATIO*Math.cos(2*2*Math.PI/5)), (-2*GOLDEN_RATIO*Math.sin(2*2*Math.PI/5)), -(GOLDEN_RATIO-1), // 12
+	            (-2*GOLDEN_RATIO*Math.cos(2*3*Math.PI/5)), (-2*GOLDEN_RATIO*Math.sin(2*3*Math.PI/5)), -(GOLDEN_RATIO-1), // 13
+	            (-2*GOLDEN_RATIO*Math.cos(2*4*Math.PI/5)), (-2*GOLDEN_RATIO*Math.sin(2*4*Math.PI/5)), -(GOLDEN_RATIO-1), // 14
+
+	            (-2*Math.cos(2*0*Math.PI/5)), (-2*Math.sin(2*0*Math.PI/5)), -(GOLDEN_RATIO+1), // 15
+	            (-2*Math.cos(2*1*Math.PI/5)), (-2*Math.sin(2*1*Math.PI/5)), -(GOLDEN_RATIO+1), // 16
+	            (-2*Math.cos(2*2*Math.PI/5)), (-2*Math.sin(2*2*Math.PI/5)), -(GOLDEN_RATIO+1), // 17
+	            (-2*Math.cos(2*3*Math.PI/5)), (-2*Math.sin(2*3*Math.PI/5)), -(GOLDEN_RATIO+1), // 18
+	            (-2*Math.cos(2*4*Math.PI/5)), (-2*Math.sin(2*4*Math.PI/5)), -(GOLDEN_RATIO+1), // 19
+	        ]);
+
+	        var dodecahedronFaceIndexes = new Uint8Array([
+         		// one of pair of opposite pentagons parallel to xy plane
+	            // 0, 1, 2, 3, 4
+	            1, 3, 0, 
+	            1, 2, 3,
+	            0, 3, 4,
+
+	            // 0, 4, 5, 9, 12
+	            4, 12, 0,
+	            12, 5, 0,
+	            12, 4, 9,
+
+	            // 3, 4, 8, 9, 11
+	            3, 11, 4,
+	            3, 8, 11,
+	            4, 11, 9,
+	            
+	            // 2, 3, 7, 8, 10
+	            2, 10, 3,
+	            2, 7, 10,
+	            3, 10, 8,
+	            
+	            // 1, 2, 6, 7, 14
+	            1, 14, 2,
+	            1, 6, 14,
+	            2, 14, 7,
+
+	            // 0, 1, 5, 6, 13
+	            0, 13, 1,
+	            0, 5, 13,
+	            1, 13, 6,
+
+
+	            // 15, 16, 17, 18, 19
+	            15, 18, 16,
+	            15, 19, 18,
+	            16, 18, 17,
+
+	            // 15, 19, 10, 14, 7
+	            15, 7, 19,
+	            15, 10, 7,
+	            19, 7, 14,
+
+	            // 18, 19, 13, 14, 6
+	            19, 6, 18,
+	            6, 13, 18,
+	            6, 19, 14, 
+
+	            // 17, 18, 12, 13, 5
+	            18, 5, 17,
+	            5, 12, 17,
+	            5, 18, 13, 
+
+	            // 16, 17, 11, 12, 9
+	            17, 9, 16,
+	            9, 11, 16,
+	            9, 17, 12, 
+
+	            // 15, 16, 10, 11, 8
+	            16, 8, 15,
+	            8, 10, 15,
+	            8, 16, 11
+	        ]);
+
+	        function BuildContractionMappings(vertices){
+	            cm = [[]];
+
+	            for (var i = 0; i < 20; i++)
+	            {
+	                var x = vertices[i * 3];
+	                var y = vertices[1 + i * 3];
+	                var z = vertices[2 + i * 3];
+
+	                cm.push([
+	                    scaleFactor,
+	                    0.0,
+	                    0.0,
+	                    0.0,
+	                    scaleFactor,
+	                    0.0,
+	                    0.0,
+	                    0.0,
+	                    scaleFactor,
+	                    x - scaleFactor*x,
+	                    y - scaleFactor*y,
+	                    z - scaleFactor*z ]);
+	            }
+
+	            return cm;
+	        };
+
+	        var contractionMappings = BuildContractionMappings(explicitDodecahedronVertices);
+
+	        var vertices;
+	        var normals;
+
+	        function ComputeVerticesNormalsIndexes(){
+	            localVertices = [];
+	        	localNormals = [];
+	        	
+	        	console.log("dodecahedronFaceIndexes.length = " + dodecahedronFaceIndexes.length);
+
+	            for (var i = 0; i < dodecahedronFaceIndexes.length; i += 3)
+	            {
+	                var i1 = dodecahedronFaceIndexes[i] * 3;
+	                var i2 = dodecahedronFaceIndexes[i + 1] * 3;
+	                var i3 = dodecahedronFaceIndexes[i + 2] * 3;
+
+	                // get the vertices for this triangular pentagon segement
+	                var ax = explicitDodecahedronVertices[i1];
+	                var ay = explicitDodecahedronVertices[i1 + 1];
+	                var az = explicitDodecahedronVertices[i1 + 2];
+
+	                var bx = explicitDodecahedronVertices[i2];
+	                var by = explicitDodecahedronVertices[i2 + 1];
+	                var bz = explicitDodecahedronVertices[i2 + 2];
+
+	                var cx = explicitDodecahedronVertices[i3];
+	                var cy = explicitDodecahedronVertices[i3 + 1];
+	                var cz = explicitDodecahedronVertices[i3 + 2];
+
+	                // calc normals
+	                // var ux = ax - bx;
+	                // var uy = ay - by;
+	                // var uz = az - bz;
+
+	                // var vx = cx - bx;
+	                // var vy = cy - by;
+	                // var vz = cz - bz;
+
+	                var ux = bx - ax;
+	                var uy = by - ay;
+	                var uz = bz - az;
+
+	                var vx = bx - cx;
+	                var vy = by - cy;
+	                var vz = bz - cz;
+
+	                var nx = (uz * vy) - (uy * vz);
+	                var ny = (ux * vz) - (uz * vx);
+	                var nz = (uy * vx) - (ux * vy);
+
+	                // get the texture coordinates
+	                // float texa_x, texa_y, texb_x, texb_y, texc_x, texc_y;
+
+	                // texa_x = texCoords[pentagonSegment, 0];
+	                // texa_y = texCoords[pentagonSegment, 1];
+	                // texb_x = texCoords[pentagonSegment, 2];
+	                // texb_y = texCoords[pentagonSegment, 3];
+	                // texc_x = texCoords[pentagonSegment, 4];
+	                // texc_y = texCoords[pentagonSegment, 5];
+
+	                //pentagonSegment = pentagonSegment >= 2 ? 0 : pentagonSegment + 1;
+
+	                // append vertices, normals and texcoords to list
+	                localVertices.push(ax, ay, az, bx, by, bz, cx, cy, cz);
+	                localNormals.push(nx, ny, nz, nx, ny, nz, nx, ny, nz)
+	            }
+	            
+	            vertices = Float32Array.from(localVertices);
+	            normals = Float32Array.from(localNormals);
+
+	           
+	            //vertices = ApplyContractionMappings(vertices, 3);
+	        }
+
+	        function ApplyContractionMappings(){
+	            var localVertices = new Float32Array(vertices.length*contractionMappings.length);
+	            var localNormals = new Float32Array(normals.length*contractionMappings.length);
+	            var index = 0;
+	            for (var m = 0; m < contractionMappings.length; m++)
+	            {
+	                var a = contractionMappings[m][0];
+	                var b = contractionMappings[m][1];
+	                var c = contractionMappings[m][2];
+	                var d = contractionMappings[m][3];
+	                var e = contractionMappings[m][4];
+	                var f = contractionMappings[m][5];
+	                var g = contractionMappings[m][6];
+	                var h = contractionMappings[m][7];
+	                var i = contractionMappings[m][8];
+	                var j = contractionMappings[m][9];
+	                var k = contractionMappings[m][10];
+	                var l = contractionMappings[m][11];
+	                
+	                for (var n = 0; n < vertices.length; n += 3)
+	                {
+	                    var x = vertices[n];
+	                    var y = vertices[n + 1];
+	                    var z = vertices[n + 2];
+
+	                    var xdash = a * x + b * y + c * z + j;
+	                    var ydash = d * x + e * y + f * z + k;
+	                    var zdash = g * x + h * y + i * z + l;
+
+	                    localVertices[index] = xdash;
+	                    localNormals[index] = normals[n];
+						index++;
+
+	                    localVertices[index] = ydash;
+	                    localNormals[index] = normals[n+1];
+	                    index++;
+
+	                    localVertices[index] = zdash;
+	                    localNormals[index] = normals[n+2];
+	                    index++;
+	                }
+	            }
+	            vertices = localVertices;
+	            normals = localNormals;
+	        }
+
+			init();
+			animate();
+			initGui();
+			// Init gui
+			function initGui() {
+				var gui = new dat.GUI();
+				//var gui = gui.addFolder( "Material" );
+				gui.add( settings, "metalness" ).min( 0 ).max( 1 ).onChange( function( value ) {
+					material.metalness = value;
+				} );
+				gui.add( settings, "roughness" ).min( 0 ).max( 1 ).onChange( function( value ) {
+					material.roughness = value;
+				} );
+				gui.add( settings, "aoMapIntensity" ).min( 0 ).max( 1 ).onChange( function( value ) {
+					material.aoMapIntensity = value;
+				} );
+				gui.add( settings, "ambientIntensity" ).min( 0 ).max( 1 ).onChange( function( value ) {
+					ambientLight.intensity = value;
+				} );
+				gui.add( settings, "envMapIntensity" ).min( 0 ).max( 3 ).onChange( function( value ) {
+					material.envMapIntensity = value;
+				} );
+				gui.add( settings, "displacementScale" ).min( 0 ).max( 3.0 ).onChange( function( value ) {
+					material.displacementScale = value;
+				} );
+				gui.add( settings, "normalScale" ).min( - 1 ).max( 1 ).onChange( function( value ) {
+					material.normalScale.set( 1, - 1 ).multiplyScalar( value );
+				} );
+			}
+			function init() {
+				var container = document.createElement( 'div' );
+				document.body.appendChild( container );
+				renderer = new THREE.WebGLRenderer();
+				renderer.setPixelRatio( window.devicePixelRatio );
+				renderer.setSize( window.innerWidth, window.innerHeight );
+				renderer.shadowMap.enabled = true;
+				container.appendChild( renderer.domElement );
+				renderer.gammaInput = true;
+				renderer.gammaOutput = true;
+				//
+				scene = new THREE.Scene();
+				var aspect = window.innerWidth / window.innerHeight;
+				//camera = new THREE.OrthographicCamera( - height * aspect, height * aspect, height, - height, 1, 10000 );
+				//camera.position.z = 400;
+				camera = new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 1, 10000 );
+				camera.position.z = 7;
+				scene.add( camera );
+				controls = new THREE.OrbitControls( camera, renderer.domElement );
+				controls.enableZoom = false;
+				controls.enableDamping = true;
+				// lights
+				ambientLight = new THREE.AmbientLight( 0xffffff, settings.ambientIntensity );
+				scene.add( ambientLight );
+
+				directionalLight = new THREE.DirectionalLight( 0xffffff, 0.5 );
+				directionalLight.position.set(-50*32,0,0);
+				directionalLight.castShadow = true;
+				directionalLight.shadow.mapSize.width = 1024;
+				directionalLight.shadow.mapSize.height = 1024;
+				scene.add( directionalLight );
+
+				var path = "https://threejs.org/examples/textures/cube/SwedishRoyalCastle/";
+				var format = '.jpg';
+				var urls = [
+						path + 'px' + format, path + 'nx' + format,
+						path + 'py' + format, path + 'ny' + format,
+						path + 'pz' + format, path + 'nz' + format
+					];
+
+				
+			    var loader = new THREE.CubeTextureLoader();
+			    loader.setCrossOrigin( 'anonymous' );
+				var reflectionCube = loader.load( urls );
+				reflectionCube.format = THREE.RGBFormat;
+ 				reflectionCube.mapping = THREE.CubeReflectionMapping;
+				scene.background = reflectionCube;
+
+				// this sets up the background panoramic image
+				var cubeShader = THREE.ShaderLib[ "cube" ];
+				var cubeMaterial = new THREE.ShaderMaterial( {
+					fragmentShader: cubeShader.fragmentShader,
+					vertexShader: cubeShader.vertexShader,
+					uniforms: cubeShader.uniforms,
+					depthWrite: false,
+					side: THREE.BackSide
+				} );
+				cubeMaterial.uniforms[ "tCube" ].value = reflectionCube;
+				// Skybox
+				cubeMesh = new THREE.Mesh( new THREE.BoxBufferGeometry( 100, 100, 100 ), cubeMaterial );
+				scene.add( cubeMesh );
+
+				// textures
+				//var textureLoader = new THREE.TextureLoader();
+				//var normalMap = textureLoader.load( "textures/ninja/normal.jpg" );
+				//var aoMap = textureLoader.load( "textures/ninja/ao.jpg" );
+				//var displacementMap = textureLoader.load( "textures/ninja/displacement.jpg" );
+
+				// material
+				// var material = new THREE.MeshNormalMaterial();
+
+				material = new THREE.MeshStandardMaterial( {
+					color: 0x888888,
+					roughness: settings.roughness,
+					metalness: settings.metalness,
+					//normalMap: normalMap,
+					//normalScale: new THREE.Vector2( 1, - 1 ), // why does the normal map require negation in this case?
+					//aoMap: aoMap,
+					//aoMapIntensity: 1,
+					//displacementMap: displacementMap,
+					//displacementScale: settings.displacementScale,
+					//displacementBias: - 0.428408, // from original model
+					envMap: reflectionCube,
+					//envMapIntensity: settings.envMapIntensity,
+					side: THREE.FrontSide
+				} );
+
+				var geometry = new THREE.BufferGeometry();
+				ComputeVerticesNormalsIndexes();
+				ApplyContractionMappings();
+				ApplyContractionMappings();
+				ApplyContractionMappings();
+				//ApplyContractionMappings();
+				geometry.addAttribute( 'position', new THREE.BufferAttribute( vertices, 3 ) );
+				//geometry.addAttribute( 'normal', new THREE.BufferAttribute( normals, 3 ) );
+				geometry.computeFaceNormals();
+				geometry.computeVertexNormals();
+				geometry.center();
+				mesh = new THREE.Mesh( geometry, material );
+				//mesh.scale.multiplyScalar( 100 );
+				mesh.receiveShadow = true;
+    			mesh.castShadow = true;
+				scene.add( mesh );
+
+				//var vnh = new THREE.VertexNormalsHelper( mesh, 100, 0x00ff00, 1 ); 
+				//var wfh = new THREE.WireframeGeometry( mesh );
+
+				//scene.add (vnh);
+				//scene.add (wfh);
+
+				
+				//
+				stats = new Stats();
+				container.appendChild( stats.dom );
+				//
+				window.addEventListener( 'resize', onWindowResize, false );
+			}
+			function onWindowResize() {
+				var aspect = window.innerWidth / window.innerHeight;
+				camera.left = - height * aspect;
+				camera.right = height * aspect;
+				camera.top = height;
+				camera.bottom = - height;
+				camera.updateProjectionMatrix();
+				renderer.setSize( window.innerWidth, window.innerHeight );
+			}
+			//
+			function animate() {
+				requestAnimationFrame( animate );
+				controls.update();
+				stats.begin();
+				render();
+				stats.end();
+			}
+			function render() {
+				//pointLight.position.x = 2500 * Math.cos( r );
+				//pointLight.position.z = 2500 * Math.sin( r );
+				//directionalLight.position.x = 2500 * Math.cos( r );
+				//directionalLight.position.y = 2500 * Math.sin( r );
+				//r += 0.01;
+				renderer.render( scene, camera );
+			}
+		</script>
+
+	</body>
+
+</html>
