@@ -59,23 +59,37 @@
 					4, 7, 6
 				]);
 
-				var normals = new Float32Array([
-					-0.577350, -0.577350, -0.577350,
-					0.816497, -0.408248, -0.408248,
-					-0.408248, 0.816497, -0.408248,
-					0.408248, 0.408248, -0.816497,
-					-0.408248, -0.408248, 0.816497,
-					0.408248, -0.816497, 0.408248,
-					-0.816497, 0.408248, 0.408248,
-					0.577350, 0.577350, 0.577350
-				]);
+				// var normals = new Float32Array([
+				// 	-0.577350, -0.577350, -0.577350,
+				// 	0.816497, -0.408248, -0.408248,
+				// 	-0.408248, 0.816497, -0.408248,
+				// 	0.408248, 0.408248, -0.816497,
+				// 	-0.408248, -0.408248, 0.816497,
+				// 	0.408248, -0.816497, 0.408248,
+				// 	-0.816497, 0.408248, 0.408248,
+				// 	0.577350, 0.577350, 0.577350
+				// ]);
 
 				// itemSize = 3 because there are 3 values (components) per vertex
 				geometry.addAttribute( 'position', new THREE.BufferAttribute( vertices, 3 ) );
-				geometry.addAttribute( 'normal', new THREE.BufferAttribute( normals, 3 ) );
-				geometry.addAttribute( 'index', new THREE.BufferAttribute( indices, 1 ) );
-				
-				var material = new THREE.MeshNormalMaterial();
+				//geometry.addAttribute( 'normal', new THREE.BufferAttribute( normals, 3 ) );
+				geometry.setIndex(new THREE.BufferAttribute( indices, 1 ) );
+
+				geometry.computeFaceNormals();
+				geometry.computeVertexNormals();
+
+				geometry = THREE.BoxBufferGeometry( 50, 50, 50 );
+
+				var textureLoader = new THREE.TextureLoader();
+				textureLoader.setCrossOrigin( 'anonymous' );
+				var texture = textureLoader.load( "https://threejs.org/examples/textures/crate.gif" );
+
+				// material
+				//var material = new THREE.MeshNormalMaterial();
+
+				var material = new THREE.MeshBasicMaterial( {
+				 	map: texture,
+				 } );
 
 				mesh = new THREE.Mesh( geometry, material );
 				scene.add( mesh );

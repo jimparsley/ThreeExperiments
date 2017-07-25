@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>shiny dodecahedron</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<style>
+			body {
+				background:#000;
+				color:#fff;
+				padding:0;
+				margin:0;
+				font-weight: bold;
+				overflow:hidden;
+			}
+			a {	color: #ffffff;	}
+			#info {
+				position: absolute;
+				top: 0px; width: 100%;
+				color: #ffffff;
+				padding: 5px;
+				font-family:Monospace;
+				font-size:13px;
+				text-align:center;
+			}
+			#vt { display:none }
+			#vt, #vt a { color:orange; }
+		</style>
+	</head>
+
+	<body>
+
+		<div id="info">
+			<span id="description">Dodecahedron standard material with visible normals.</span> 
+		</div>
+
+		<script src="js/three.min.js"></script>
+		<script src="js/SierpinskiDodecahedron.js"></script>
+		<script src="js/controls/OrbitControls.js"></script>
+
+		<script src="js/Detector.js"></script>
+		<script src="js/libs/stats.min.js"></script>
+		<script src='js/libs/dat.gui.min.js'></script>
+
+		<script>
+			if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
+			var stats;
+			var camera, scene, renderer;
+			var settings = {
+				metalness: 1.0,
+				roughness: 0.4,
+				ambientIntensity: 0.2
+			};
+			var mesh, material;
+			var directionalLight, ambientLight;
+			var mouseX = 0;
+			var mouseY = 0;
+			var windowHalfX = window.innerWidth / 2;
+			var windowHalfY = window.innerHeight / 2;
+			var height = 500; // of camera frustum
+			var r = 0.0;
+
+			init();
+			animate();
+			
+			function init() {
+				var container = document.createElement( 'div' );
+				document.body.appendChild( container );
+				renderer = new THREE.WebGLRenderer();
+				renderer.setPixelRatio( window.devicePixelRatio );
+				renderer.setSize( window.innerWidth, window.innerHeight );
+				container.appendChild( renderer.domElement );
+				renderer.gammaInput = true;
+				renderer.gammaOutput = true;
+				//
+				scene = new THREE.Scene();
+				var aspect = window.innerWidth / window.innerHeight;
+				camera = new THREE.OrthographicCamera( - height * aspect, height * aspect, height, - height, 1, 10000 );
+				camera.position.z = 400;
+				scene.add( camera );
+				controls = new THREE.OrbitControls( camera, renderer.domElement );
+				controls.enableZoom = false;
+				controls.enableDamping = true;
+
+				// lights
+				ambientLight = new THREE.AmbientLight( 0xffffff, settings.ambientIntensity );
+				scene.add( ambientLight );
+
+				directionalLight = new THREE.DirectionalLight( 0xffffff, 0.5 );
+				directionalLight.position.set(-50*32,0,0);
+				
+				scene.add( directionalLight );
+
+				var path = "https://threejs.org/examples/textures/cube/SwedishRoyalCastle/";
+				var format = '.jpg';
+				var urls = [
+						path + 'px' + format, path + 'nx' + format,
+						path + 'py' + format, path + 'ny' + format,
+						path + 'pz' + format, path + 'nz' + format
+					];
+
+				
+			    var loader = new THREE.CubeTextureLoader();
+			    loader.setCrossOrigin( 'anonymous' );
+				var reflectionCube = loader.load( urls );
+				reflectionCube.format = THREE.RGBFormat;
+
+				scene.background = reflectionCube;
+
+				material = new THREE.MeshStandardMaterial( {
+					color: 0x888888,
+					roughness: settings.roughness,
+					metalness: settings.metalness,
+					side: THREE.FrontSide,
+					envMap: reflectionCube
+				} );
+
+				var geometry = new THREE.IFS.SierpinskiDodecahedron.createBufferGeometry(0);
+				geometry.center();
+				mesh = new THREE.Mesh( geometry, material );
+				mesh.scale.multiplyScalar( 100 );
+				
+				scene.add( mesh );
+
+				var vnh = new THREE.VertexNormalsHelper( mesh, 100, 0x00ff00, 1 ); 
+				
+				scene.add (vnh);
+				
+				stats = new Stats();
+				container.appendChild( stats.dom );
+				//
+				window.addEventListener( 'resize', onWindowResize, false );
+			}
+			function onWindowResize() {
+				var aspect = window.innerWidth / window.innerHeight;
+				camera.left = - height * aspect;
+				camera.right = height * aspect;
+				camera.top = height;
+				camera.bottom = - height;
+				camera.updateProjectionMatrix();
+				renderer.setSize( window.innerWidth, window.innerHeight );
+			}
+			//
+			function animate() {
+				requestAnimationFrame( animate );
+				controls.update();
+				stats.begin();
+				render();
+				stats.end();
+			}
+			function render() {
+				renderer.render( scene, camera );
+			}
+		</script>
+
+	</body>
+
+</html>
