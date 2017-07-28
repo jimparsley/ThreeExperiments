@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>three.js webgl - geometry - cube</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/themes/smoothness/jquery-ui.css">
+		<style>
+			body{
+			  background-color: black;
+			  margin: 0;
+			}
+
+			#container{
+			  background-color: black;
+			  width: 750px;
+			  height: 450px;
+			  overflow: hidden;
+			  margin: 0 auto;
+			  position: relative; 
+			}
+
+			#slider{
+			  position: absolute;
+			  bottom: 30px;
+			  left: 40px;
+			  right: 40px;
+			}
+
+			.ui-slider .ui-slider-handle { 
+			  width: 40px !important; 
+			  margin-left: -20px !important; 
+			  height:40px !important; 
+			  margin-top:-10px !important;
+			}
+
+			#labels {
+			  position: absolute;
+			  top: 20px;
+			  left: 20px;
+			  color: white;
+			  font-size: 18px;
+			}
+		</style>
+	</head>
+	<body>
+
+		<div id="container">
+			<div id="labels">
+				<div>Rotation (<span id="rotate">#</span>)</div>
+				<div>Position (<span id="move">#</span>)</div>
+			</div>
+			<div id="slider"></div>
+			<div id="canvas"></div>
+		</div>
+
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+		<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+		<script src="js/three.min.js"></script>
+		<script src="https://code.createjs.com/tweenjs-0.6.2.min.js"></script>
+		<script src="js/SierpinskiDodecahedron.js"></script>
+
+		<script>
+			'use strict';
+
+			var canvas = document.getElementById('canvas');
+			var rotateLabel = document.getElementById('rotate');
+			var moveLabel = document.getElementById('move');
+
+			var round = function round(x) {
+				return Math.round(x * 100) / 100;
+			};
+
+			var xyzFormat = function xyzFormat(_ref) {
+				var x = _ref.x;
+				var y = _ref.y;
+				var z = _ref.z;
+				return '{ x: ' + round(x) + ', y: ' + round(y) + ', z: ' + round(z) + ' }';
+			};
+
+			// SCENE
+
+			var scene = new THREE.Scene();
+			var camera = new THREE.PerspectiveCamera(60, 750 / 450, 1, 100);
+			camera.position.set(10, 1.1, 4.1);
+			camera.lookAt(scene.position);
+
+			scene.add(new THREE.GridHelper(15, 20));
+
+			var animations = [];
+
+			for(var i=0; i<20; i++){
+			
+				var geometry = THREE.IFS.SierpinskiDodecahedron.createBufferGeometry(0);
+				var mesh = new THREE.Mesh(geometry, new THREE.MeshNormalMaterial());
+				
+				scene.add(mesh);
+
+				// ANIMATION
+				var p = THREE.IFS.SierpinskiDodecahedron.translate(mesh.position, i);
+				console.log(p);
+				
+				var moveAnimation = new createjs.Tween(mesh.position).to({ x: p.x, y: p.y, z: p.z }, 1000);
+
+				var scaleFactor = THREE.IFS.SierpinskiDodecahedron.scaleFactor;
+				var scaleAnimation = new createjs.Tween(mesh.scale).to({x: scaleFactor, y: scaleFactor, z: scaleFactor}, 1000);
+
+				animations.push(moveAnimation);
+				animations.push(scaleAnimation);
+			}
+
+			var timeline = new createjs.Timeline(animations, {}, { paused: false });
+
+			// SLIDER
+
+			$('#slider').slider({
+				range: false,
+				min: 0,
+				max: 1,
+				step: 0.001,
+				slide: function slide(event, ui) {
+					timeline.setPosition(ui.value * 1000);
+				}
+			});
+
+			// RENDER
+
+			var renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+			renderer.setSize(750, 450);
+
+			canvas.appendChild(renderer.domElement);
+
+			(function animate() {
+				requestAnimationFrame(animate);
+				renderer.render(scene, camera);
+			})();
+		</script>
+
+	</body>
+</html>

@@ -5,37 +5,36 @@ THREE.IFS  = THREE.IFS    || {};
 
 THREE.IFS.SierpinskiDodecahedron = THREE.IFS.SierpinskiDodecahedron  || {};
 
-THREE.IFS.SierpinskiDodecahedron.createBufferGeometry = function(iterations) {
-    var GOLDEN_RATIO = (1 + Math.sqrt(5)) / 2;
-    var scaleFactor = 1/(1+GOLDEN_RATIO);
+THREE.IFS.SierpinskiDodecahedron.GOLDEN_RATIO = (1 + Math.sqrt(5)) / 2;
+THREE.IFS.SierpinskiDodecahedron.scaleFactor = 1/(1+THREE.IFS.SierpinskiDodecahedron.GOLDEN_RATIO);
 
-    var dodecahedronVertices = new Float32Array([
-        (2*Math.cos(2*0*Math.PI/5)), (2*Math.sin(2*0*Math.PI/5)), GOLDEN_RATIO+1, // 0
-        (2*Math.cos(2*1*Math.PI/5)), (2*Math.sin(2*1*Math.PI/5)), GOLDEN_RATIO+1, // 1
-        (2*Math.cos(2*2*Math.PI/5)), (2*Math.sin(2*2*Math.PI/5)), GOLDEN_RATIO+1, // 2
-        (2*Math.cos(2*3*Math.PI/5)), (2*Math.sin(2*3*Math.PI/5)), GOLDEN_RATIO+1, // 3
-        (2*Math.cos(2*4*Math.PI/5)), (2*Math.sin(2*4*Math.PI/5)), GOLDEN_RATIO+1, // 4
+THREE.IFS.SierpinskiDodecahedron.dodecahedronVertices = new Float32Array([
+        (2*Math.cos(2*0*Math.PI/5)), (2*Math.sin(2*0*Math.PI/5)), THREE.IFS.SierpinskiDodecahedron.GOLDEN_RATIO+1, // 0
+        (2*Math.cos(2*1*Math.PI/5)), (2*Math.sin(2*1*Math.PI/5)), THREE.IFS.SierpinskiDodecahedron.GOLDEN_RATIO+1, // 1
+        (2*Math.cos(2*2*Math.PI/5)), (2*Math.sin(2*2*Math.PI/5)), THREE.IFS.SierpinskiDodecahedron.GOLDEN_RATIO+1, // 2
+        (2*Math.cos(2*3*Math.PI/5)), (2*Math.sin(2*3*Math.PI/5)), THREE.IFS.SierpinskiDodecahedron.GOLDEN_RATIO+1, // 3
+        (2*Math.cos(2*4*Math.PI/5)), (2*Math.sin(2*4*Math.PI/5)), THREE.IFS.SierpinskiDodecahedron.GOLDEN_RATIO+1, // 4
 
-        (2*GOLDEN_RATIO*Math.cos(2*0*Math.PI/5)), (2*GOLDEN_RATIO*Math.sin(2*0*Math.PI/5)), GOLDEN_RATIO-1, // 5
-        (2*GOLDEN_RATIO*Math.cos(2*1*Math.PI/5)), (2*GOLDEN_RATIO*Math.sin(2*1*Math.PI/5)), GOLDEN_RATIO-1, // 6
-        (2*GOLDEN_RATIO*Math.cos(2*2*Math.PI/5)), (2*GOLDEN_RATIO*Math.sin(2*2*Math.PI/5)), GOLDEN_RATIO-1, // 7
-        (2*GOLDEN_RATIO*Math.cos(2*3*Math.PI/5)), (2*GOLDEN_RATIO*Math.sin(2*3*Math.PI/5)), GOLDEN_RATIO-1, // 8
-        (2*GOLDEN_RATIO*Math.cos(2*4*Math.PI/5)), (2*GOLDEN_RATIO*Math.sin(2*4*Math.PI/5)), GOLDEN_RATIO-1, // 9
+        (2*THREE.IFS.SierpinskiDodecahedron.GOLDEN_RATIO*Math.cos(2*0*Math.PI/5)), (2*THREE.IFS.SierpinskiDodecahedron.GOLDEN_RATIO*Math.sin(2*0*Math.PI/5)), THREE.IFS.SierpinskiDodecahedron.GOLDEN_RATIO-1, // 5
+        (2*THREE.IFS.SierpinskiDodecahedron.GOLDEN_RATIO*Math.cos(2*1*Math.PI/5)), (2*THREE.IFS.SierpinskiDodecahedron.GOLDEN_RATIO*Math.sin(2*1*Math.PI/5)), THREE.IFS.SierpinskiDodecahedron.GOLDEN_RATIO-1, // 6
+        (2*THREE.IFS.SierpinskiDodecahedron.GOLDEN_RATIO*Math.cos(2*2*Math.PI/5)), (2*THREE.IFS.SierpinskiDodecahedron.GOLDEN_RATIO*Math.sin(2*2*Math.PI/5)), THREE.IFS.SierpinskiDodecahedron.GOLDEN_RATIO-1, // 7
+        (2*THREE.IFS.SierpinskiDodecahedron.GOLDEN_RATIO*Math.cos(2*3*Math.PI/5)), (2*THREE.IFS.SierpinskiDodecahedron.GOLDEN_RATIO*Math.sin(2*3*Math.PI/5)), THREE.IFS.SierpinskiDodecahedron.GOLDEN_RATIO-1, // 8
+        (2*THREE.IFS.SierpinskiDodecahedron.GOLDEN_RATIO*Math.cos(2*4*Math.PI/5)), (2*THREE.IFS.SierpinskiDodecahedron.GOLDEN_RATIO*Math.sin(2*4*Math.PI/5)), THREE.IFS.SierpinskiDodecahedron.GOLDEN_RATIO-1, // 9
 
-        (-2*GOLDEN_RATIO*Math.cos(2*0*Math.PI/5)), (-2*GOLDEN_RATIO*Math.sin(2*0*Math.PI/5)), -(GOLDEN_RATIO-1), // 10
-        (-2*GOLDEN_RATIO*Math.cos(2*1*Math.PI/5)), (-2*GOLDEN_RATIO*Math.sin(2*1*Math.PI/5)), -(GOLDEN_RATIO-1), // 11
-        (-2*GOLDEN_RATIO*Math.cos(2*2*Math.PI/5)), (-2*GOLDEN_RATIO*Math.sin(2*2*Math.PI/5)), -(GOLDEN_RATIO-1), // 12
-        (-2*GOLDEN_RATIO*Math.cos(2*3*Math.PI/5)), (-2*GOLDEN_RATIO*Math.sin(2*3*Math.PI/5)), -(GOLDEN_RATIO-1), // 13
-        (-2*GOLDEN_RATIO*Math.cos(2*4*Math.PI/5)), (-2*GOLDEN_RATIO*Math.sin(2*4*Math.PI/5)), -(GOLDEN_RATIO-1), // 14
+        (-2*THREE.IFS.SierpinskiDodecahedron.GOLDEN_RATIO*Math.cos(2*0*Math.PI/5)), (-2*THREE.IFS.SierpinskiDodecahedron.GOLDEN_RATIO*Math.sin(2*0*Math.PI/5)), -(THREE.IFS.SierpinskiDodecahedron.GOLDEN_RATIO-1), // 10
+        (-2*THREE.IFS.SierpinskiDodecahedron.GOLDEN_RATIO*Math.cos(2*1*Math.PI/5)), (-2*THREE.IFS.SierpinskiDodecahedron.GOLDEN_RATIO*Math.sin(2*1*Math.PI/5)), -(THREE.IFS.SierpinskiDodecahedron.GOLDEN_RATIO-1), // 11
+        (-2*THREE.IFS.SierpinskiDodecahedron.GOLDEN_RATIO*Math.cos(2*2*Math.PI/5)), (-2*THREE.IFS.SierpinskiDodecahedron.GOLDEN_RATIO*Math.sin(2*2*Math.PI/5)), -(THREE.IFS.SierpinskiDodecahedron.GOLDEN_RATIO-1), // 12
+        (-2*THREE.IFS.SierpinskiDodecahedron.GOLDEN_RATIO*Math.cos(2*3*Math.PI/5)), (-2*THREE.IFS.SierpinskiDodecahedron.GOLDEN_RATIO*Math.sin(2*3*Math.PI/5)), -(THREE.IFS.SierpinskiDodecahedron.GOLDEN_RATIO-1), // 13
+        (-2*THREE.IFS.SierpinskiDodecahedron.GOLDEN_RATIO*Math.cos(2*4*Math.PI/5)), (-2*THREE.IFS.SierpinskiDodecahedron.GOLDEN_RATIO*Math.sin(2*4*Math.PI/5)), -(THREE.IFS.SierpinskiDodecahedron.GOLDEN_RATIO-1), // 14
 
-        (-2*Math.cos(2*0*Math.PI/5)), (-2*Math.sin(2*0*Math.PI/5)), -(GOLDEN_RATIO+1), // 15
-        (-2*Math.cos(2*1*Math.PI/5)), (-2*Math.sin(2*1*Math.PI/5)), -(GOLDEN_RATIO+1), // 16
-        (-2*Math.cos(2*2*Math.PI/5)), (-2*Math.sin(2*2*Math.PI/5)), -(GOLDEN_RATIO+1), // 17
-        (-2*Math.cos(2*3*Math.PI/5)), (-2*Math.sin(2*3*Math.PI/5)), -(GOLDEN_RATIO+1), // 18
-        (-2*Math.cos(2*4*Math.PI/5)), (-2*Math.sin(2*4*Math.PI/5)), -(GOLDEN_RATIO+1), // 19
+        (-2*Math.cos(2*0*Math.PI/5)), (-2*Math.sin(2*0*Math.PI/5)), -(THREE.IFS.SierpinskiDodecahedron.GOLDEN_RATIO+1), // 15
+        (-2*Math.cos(2*1*Math.PI/5)), (-2*Math.sin(2*1*Math.PI/5)), -(THREE.IFS.SierpinskiDodecahedron.GOLDEN_RATIO+1), // 16
+        (-2*Math.cos(2*2*Math.PI/5)), (-2*Math.sin(2*2*Math.PI/5)), -(THREE.IFS.SierpinskiDodecahedron.GOLDEN_RATIO+1), // 17
+        (-2*Math.cos(2*3*Math.PI/5)), (-2*Math.sin(2*3*Math.PI/5)), -(THREE.IFS.SierpinskiDodecahedron.GOLDEN_RATIO+1), // 18
+        (-2*Math.cos(2*4*Math.PI/5)), (-2*Math.sin(2*4*Math.PI/5)), -(THREE.IFS.SierpinskiDodecahedron.GOLDEN_RATIO+1), // 19
     ]);
 
-    var dodecahedronFaceIndexes = new Uint8Array([
+THREE.IFS.SierpinskiDodecahedron.dodecahedronFaceIndexes = new Uint8Array([
         // one of pair of opposite pentagons parallel to xy plane
         // 0, 1, 2, 3, 4
         1, 3, 0, 
@@ -99,19 +98,85 @@ THREE.IFS.SierpinskiDodecahedron.createBufferGeometry = function(iterations) {
         8, 16, 11
     ]);
 
-    var texCoordLookup = [          
-        [0.7847, 0.0639, 0.5, 0.9375, 0.2167, 0.0639 ],
-        [0.7847, 0.0639, 0.9597, 0.6056, 0.5, 0.9375 ],
-        [0.2167, 0.0639, 0.5, 0.9375, 0.0417, 0.6056 ]
-    ];
+THREE.IFS.SierpinskiDodecahedron.texCoordLookup = [          
+    [0.7847, 0.0639, 0.5, 0.9375, 0.2167, 0.0639 ],
+    [0.7847, 0.0639, 0.9597, 0.6056, 0.5, 0.9375 ],
+    [0.2167, 0.0639, 0.5, 0.9375, 0.0417, 0.6056 ]
+];
+
+THREE.IFS.SierpinskiDodecahedron.contractionMappings = (function (vertices, scaleFactor) {
+    var cm = [[]];
+
+    for (var i = 0; i < 20; i++)
+    {
+        var x = vertices[i * 3];
+        var y = vertices[1 + i * 3];
+        var z = vertices[2 + i * 3];
+
+        cm[i] = [
+            scaleFactor,
+            0.0,
+            0.0,
+            0.0,
+            scaleFactor,
+            0.0,
+            0.0,
+            0.0,
+            scaleFactor,
+            x - scaleFactor*x,
+            y - scaleFactor*y,
+            z - scaleFactor*z ];
+    }
+
+    return cm;
+})(THREE.IFS.SierpinskiDodecahedron.dodecahedronVertices, THREE.IFS.SierpinskiDodecahedron.scaleFactor);
+
+THREE.IFS.SierpinskiDodecahedron.translate = function(p, cmIndex) {
+    var cm = THREE.IFS.SierpinskiDodecahedron.contractionMappings[cmIndex];
+    console.log(THREE.IFS.SierpinskiDodecahedron.dodecahedronVertices);
+    console.log(THREE.IFS.SierpinskiDodecahedron.contractionMappings);
+    var position = {
+        x: cm[9] + p.x,
+        y: cm[10] + p.y,
+        z: cm[11] + p.z
+    };
+    return position;
+}
+
+THREE.IFS.SierpinskiDodecahedron.translateX = function(x, cmIndex) {
+    var cm = THREE.IFS.SierpinskiDodecahedron.contractionMappings[cmIndex];
+    return cm[9] + x;
+}
+
+THREE.IFS.SierpinskiDodecahedron.translateY = function(y, cmIndex) {
+    var cm = THREE.IFS.SierpinskiDodecahedron.contractionMappings[cmIndex];
+    return cm[10] + y;
+}
+
+THREE.IFS.SierpinskiDodecahedron.translateZ = function(z, cmIndex) {
+    var cm = THREE.IFS.SierpinskiDodecahedron.contractionMappings[cmIndex];
+    return cm[11] + z;
+}   
+
+
+THREE.IFS.SierpinskiDodecahedron.createBufferGeometry = function(iterations) {
     
-    var contractionMappings = BuildContractionMappings(dodecahedronVertices, scaleFactor);
+    var GOLDEN_RATIO = THREE.IFS.SierpinskiDodecahedron.GOLDEN_RATIO;
+    var scaleFactor = THREE.IFS.SierpinskiDodecahedron.scaleFactor;
+
+    var dodecahedronVertices = THREE.IFS.SierpinskiDodecahedron.dodecahedronVertices;
+
+    var dodecahedronFaceIndexes = THREE.IFS.SierpinskiDodecahedron.dodecahedronFaceIndexes;
+
+    var texCoordLookup = THREE.IFS.SierpinskiDodecahedron.texCoordLookup;
+    
+    var contractionMappings = THREE.IFS.SierpinskiDodecahedron.contractionMappings;
 
     var vertices;
     var normals; // normals calculated automatically by PolyhedronBufferGeometry?
     var uvs;
 
-    ComputeVerticesNormalsIndexes();
+    ComputeVerticesNormalsUvs();
 
     for(var i=0; i<iterations; i++)
         ApplyContractionMappings();
@@ -128,34 +193,8 @@ THREE.IFS.SierpinskiDodecahedron.createBufferGeometry = function(iterations) {
     return geometry;
 
     // helper functions
-    function BuildContractionMappings(vertices, scaleFactor){
-        var cm = [[]];
 
-        for (var i = 0; i < 20; i++)
-        {
-            var x = vertices[i * 3];
-            var y = vertices[1 + i * 3];
-            var z = vertices[2 + i * 3];
-
-            cm.push([
-                scaleFactor,
-                0.0,
-                0.0,
-                0.0,
-                scaleFactor,
-                0.0,
-                0.0,
-                0.0,
-                scaleFactor,
-                x - scaleFactor*x,
-                y - scaleFactor*y,
-                z - scaleFactor*z ]);
-        }
-
-        return cm;
-    };
-
-    function ComputeVerticesNormalsIndexes(){
+    function ComputeVerticesNormalsUvs(){
         var localVertices = [];
         var localNormals = [];
         var localUvs = [];
