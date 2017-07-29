@@ -87,41 +87,68 @@
 
 			scene.add(new THREE.GridHelper(15, 20));
 
-			var animations = [];
+			// var animations = [];
 
-			for(var i=0; i<20; i++){
+			// for(var i=0; i<20; i++){
 			
-				var geometry = THREE.IFS.SierpinskiDodecahedron.createBufferGeometry(0);
-				var mesh = new THREE.Mesh(geometry, new THREE.MeshNormalMaterial());
+			// 	var geometry = THREE.IFS.SierpinskiDodecahedron.createBufferGeometry(0);
+			// 	var mesh = new THREE.Mesh(geometry, new THREE.MeshNormalMaterial());
 				
-				scene.add(mesh);
+			// 	scene.add(mesh);
 
-				// ANIMATION
-				var p = THREE.IFS.SierpinskiDodecahedron.translate(mesh.position, i);
-				console.log(p);
+			// 	// ANIMATION
+			// 	var p = THREE.IFS.SierpinskiDodecahedron.translate(mesh.position, i);
 				
-				var moveAnimation = new createjs.Tween(mesh.position).to({ x: p.x, y: p.y, z: p.z }, 1000);
+			// 	var moveAnimation = new createjs.Tween(mesh.position).to({ x: p.x, y: p.y, z: p.z }, 1000);
 
-				var scaleFactor = THREE.IFS.SierpinskiDodecahedron.scaleFactor;
-				var scaleAnimation = new createjs.Tween(mesh.scale).to({x: scaleFactor, y: scaleFactor, z: scaleFactor}, 1000);
+			// 	var scaleFactor = THREE.IFS.SierpinskiDodecahedron.scaleFactor;
+			// 	var scaleAnimation = new createjs.Tween(mesh.scale).to({x: scaleFactor, y: scaleFactor, z: scaleFactor}, 1000);
 
-				animations.push(moveAnimation);
-				animations.push(scaleAnimation);
+			// 	animations.push(moveAnimation);
+			// 	animations.push(scaleAnimation);
+			// }
+
+			var geometry = THREE.IFS.SierpinskiDodecahedron.createBufferGeometry(0);
+			var mesh = new THREE.Mesh(geometry, new THREE.MeshNormalMaterial());
+			scene.add(mesh);
+			//var timeline = new createjs.Timeline({}, {}, { paused: false });
+
+			performIterations(scene, mesh, 2);
+
+			function performIterations(theScene, startMesh, iterations) {
+				if(iterations <= 0) return;
+				//theTimeline.setPaused(true);
+				//theTimeline = new createjs.Timeline({}, {}, { paused: false });
+
+				for(var i=0; i<20; i++){
+					var newMesh = new THREE.Object3D();
+					newMesh.add(startMesh.clone());
+
+					theScene.add(newMesh);
+
+					var p = THREE.IFS.SierpinskiDodecahedron.translate(newMesh.position, i);
+					var moveAnimation = new createjs.Tween(newMesh.position).to({ x: p.x, y: p.y, z: p.z }, 1000).call(performIterations, [theScene,  newMesh, iterations-1], this);
+					var scaleFactor = THREE.IFS.SierpinskiDodecahedron.scaleFactor;
+					var scaleAnimation = new createjs.Tween(newMesh.scale).to({x: scaleFactor, y: scaleFactor, z: scaleFactor}, 1000);
+
+					//theTimeline.addTween(moveAnimation);
+					//theTimeline.addTween(scaleAnimation);
+				}
+				theScene.remove(startMesh);
+				//theTimeline.setPaused(false);
 			}
-
-			var timeline = new createjs.Timeline(animations, {}, { paused: false });
 
 			// SLIDER
 
-			$('#slider').slider({
-				range: false,
-				min: 0,
-				max: 1,
-				step: 0.001,
-				slide: function slide(event, ui) {
-					timeline.setPosition(ui.value * 1000);
-				}
-			});
+			// $('#slider').slider({
+			// 	range: false,
+			// 	min: 0,
+			// 	max: 1,
+			// 	step: 0.001,
+			// 	slide: function slide(event, ui) {
+			// 		timeline.setPosition(ui.value * 1000);
+			// 	}
+			// });
 
 			// RENDER
 
@@ -132,6 +159,7 @@
 
 			(function animate() {
 				requestAnimationFrame(animate);
+				
 				renderer.render(scene, camera);
 			})();
 		</script>

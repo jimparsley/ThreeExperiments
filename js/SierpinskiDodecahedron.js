@@ -133,8 +133,7 @@ THREE.IFS.SierpinskiDodecahedron.contractionMappings = (function (vertices, scal
 
 THREE.IFS.SierpinskiDodecahedron.translate = function(p, cmIndex) {
     var cm = THREE.IFS.SierpinskiDodecahedron.contractionMappings[cmIndex];
-    console.log(THREE.IFS.SierpinskiDodecahedron.dodecahedronVertices);
-    console.log(THREE.IFS.SierpinskiDodecahedron.contractionMappings);
+    
     var position = {
         x: cm[9] + p.x,
         y: cm[10] + p.y,
